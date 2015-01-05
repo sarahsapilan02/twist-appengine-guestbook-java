@@ -1,7 +1,7 @@
 App Engine Java Guestbook
 Copyright (C) 2010-2014 Google Inc.
 
-## Sample guestbook for use with App Engine Java.
+## Sample guestbook for use with App Engine Java. Update to use Twist Object Mapping.
 
 Requires [Apache Maven](http://maven.apache.org) 3.1 or greater, and JDK 7+ in order to run.
 
