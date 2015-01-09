@@ -41,6 +41,8 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import static com.textquo.twist.ObjectStoreService.store;
+
 public class SignGuestbookServletTest {
 
   private SignGuestbookServlet signGuestbookServlet;
@@ -83,13 +85,16 @@ public class SignGuestbookServletTest {
 
     User currentUser = UserServiceFactory.getUserService().getCurrentUser();
 
-    Entity greeting = DatastoreServiceFactory.getDatastoreService().prepare(new Query()).asSingleEntity();
+    //Entity greeting = DatastoreServiceFactory.getDatastoreService().prepare(new Query()).asSingleEntity();
 
-    assertEquals(guestbookName, greeting.getKey().getParent().getName());
-    assertEquals(testContent, greeting.getProperty("content"));
-    assertEquals(currentUser, greeting.getProperty("user"));
+    Greeting greeting = (Greeting) store().find(Greeting.class).first();
 
-    Date date = (Date) greeting.getProperty("date");
+
+    assertEquals(guestbookName, greeting.getParent().getName());
+    assertEquals(testContent, greeting.getContent());
+    assertEquals(currentUser, greeting.getUser());
+
+    Date date = (Date) greeting.getDate();
     assertTrue("The date in the entity [" + date + "] is prior to the request being performed",
         priorToRequest.before(date) || priorToRequest.equals(date));
     assertTrue("The date in the entity [" + date + "] is after to the request completed",
