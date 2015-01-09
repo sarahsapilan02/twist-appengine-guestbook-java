@@ -1,11 +1,15 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
 <%@ page import="com.google.appengine.api.datastore.DatastoreService" %>
 <%@ page import="com.google.appengine.api.datastore.DatastoreServiceFactory" %>
 <%@ page import="com.google.appengine.api.datastore.Entity" %>
 <%@ page import="com.google.appengine.api.datastore.FetchOptions" %>
+<%@ page import="com.google.appengine.api.datastore.Query" %>
+
 <%@ page import="com.google.appengine.api.datastore.Key" %>
 <%@ page import="com.google.appengine.api.datastore.KeyFactory" %>
-<%@ page import="com.google.appengine.api.datastore.Query" %>
+<%@ page import="static com.textquo.twist.ObjectStoreService.store" %>
+<%@ page import="com.google.appengine.demos.guestbook.Greeting" %>
 <%@ page import="com.google.appengine.api.users.User" %>
 <%@ page import="com.google.appengine.api.users.UserService" %>
 <%@ page import="com.google.appengine.api.users.UserServiceFactory" %>
@@ -47,8 +51,10 @@
     Key guestbookKey = KeyFactory.createKey("Guestbook", guestbookName);
     // Run an ancestor query to ensure we see the most up-to-date
     // view of the Greetings belonging to the selected Guestbook.
-    Query query = new Query("Greeting", guestbookKey).addSort("date", Query.SortDirection.DESCENDING);
-    List<Entity> greetings = datastore.prepare(query).asList(FetchOptions.Builder.withLimit(5));
+    List<Greeting> greetings = store().find(Greeting.class, "Greeting", guestbookKey)
+            .sortDescending("date")
+            .limit(5)
+            .asList().getList();
     if (greetings.isEmpty()) {
 %>
 <p>Guestbook '${fn:escapeXml(guestbookName)}' has no messages.</p>
@@ -57,16 +63,16 @@
 %>
 <p>Messages in Guestbook '${fn:escapeXml(guestbookName)}'.</p>
 <%
-    for (Entity greeting : greetings) {
+    for (Greeting greeting : greetings) {
         pageContext.setAttribute("greeting_content",
-                greeting.getProperty("content"));
-        if (greeting.getProperty("user") == null) {
+                greeting.getContent());
+        if (greeting.getUser() == null) {
 %>
 <p>An anonymous person wrote:</p>
 <%
 } else {
     pageContext.setAttribute("greeting_user",
-            greeting.getProperty("user"));
+            greeting.getUser());
 %>
 <p><b>${fn:escapeXml(greeting_user.nickname)}</b> wrote:</p>
 <%
